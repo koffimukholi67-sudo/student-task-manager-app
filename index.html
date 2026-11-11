@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1f4fd8">
+  <title>Student Task Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg:#f3f6fb; --card:#fff; --ink:#17243b; --muted:#68758b;
+      --line:#dce3ee; --brand:#315bd6; --brand-soft:#e9efff;
+      --high:#d9435c; --medium:#d88a16; --low:#21966d;
+      --shadow:0 8px 24px rgba(27,47,86,.07);
+    }
+    :root[data-theme="dark"] {
+      color-scheme:dark;
+      --bg:#101827; --card:#19263a; --ink:#edf3ff; --muted:#a3b0c5;
+      --line:#30405a; --brand:#89a7ff; --brand-soft:#26395f;
+      --high:#ff7188; --medium:#f4bd5b; --low:#59d4a5;
+      --shadow:0 8px 24px rgba(0,0,0,.18);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 Inter,system-ui,sans-serif}
+    main{max-width:960px;margin:auto;padding:28px 18px 56px}
+    header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:22px}
+    h1{font-size:clamp(1.7rem,5vw,2.35rem);line-height:1.15;margin:0 0 7px;font-weight:800;letter-spacing:-.04em}
+    .subtitle{color:var(--muted);margin:0}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;padding:9px 13px;font-weight:600}
+    button:hover{border-color:var(--brand)}
+    button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+    .primary{background:var(--brand);color:white;border-color:var(--brand)}
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
+    .stat,.panel,.task{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+    .stat{padding:15px}.stat strong{display:block;font-size:1.65rem;line-height:1.2}.stat span{color:var(--muted);font-size:.86rem}
+    .progress{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin:0 0 14px}
+    .progress span{display:block;height:100%;width:0;background:var(--low);transition:width .25s}
+    #reminder{display:none;padding:11px 14px;margin:0 0 14px;border-left:4px solid var(--medium);background:var(--card);border-radius:8px}
+    .panel{padding:17px;margin-bottom:16px}
+    h2{font-size:1.05rem;margin:0 0 13px}
+    form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    label{display:grid;gap:5px;color:var(--muted);font-size:.88rem;font-weight:600}
+    label.wide{grid-column:1/-1}
+    input,select,textarea{width:100%;min-width:0;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:10px}
+    textarea{min-height:76px;resize:vertical}
+    .form-actions{display:flex;gap:8px;grid-column:1/-1;flex-wrap:wrap}
+    .toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0 12px}
+    .toolbar input{flex:1 1 210px}
+    .toolbar select{width:auto}
+    .filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:13px}
+    .filters button[aria-pressed="true"]{background:var(--brand-soft);border-color:var(--brand);color:var(--brand)}
+    #taskList{display:grid;gap:10px}
+    .task{padding:14px;display:grid;grid-template-columns:auto 1fr;gap:8px 12px;border-left:5px solid var(--medium)}
+    .task.priority-high{border-left-color:var(--high)}
+    .task.priority-low{border-left-color:var(--low)}
+    .task.overdue{background:color-mix(in srgb,var(--high) 8%,var(--card))}
+    .task.completed .task-title{text-decoration:line-through;color:var(--muted)}
+    .task-check{width:21px;height:21px;margin-top:3px;accent-color:var(--brand)}
+    .task-title{font-weight:700;font-size:1rem;overflow-wrap:anywhere}
+    .meta{font-size:.86rem;color:var(--muted);margin-top:3px}
+    .late{color:var(--high);font-weight:700}
+    .notes{grid-column:2;color:var(--muted);font-size:.9rem;overflow-wrap:anywhere}
+    .actions{grid-column:2;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+    .actions select{width:auto;padding:6px 8px}
+    .actions button{padding:6px 10px;font-size:.86rem}
+    .delete.confirm{background:var(--high);border-color:var(--high);color:white}
+    .empty{text-align:center;color:var(--muted);padding:28px 12px;border:2px dashed var(--line);border-radius:12px}
+    .small-note{color:var(--muted);font-size:.82rem;margin:14px 2px 0}
+    [hidden]{display:none!important}
+    @media(max-width:620px){main{padding:22px 13px 40px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}header{align-items:center}form{grid-template-columns:1fr}label.wide,.form-actions{grid-column:1}.toolbar select{flex:1}.stat{padding:12px}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Student Task Manager</h1>
+      <p class="subtitle">Organize assignments, manage deadlines and keep your studies on track.</p>
+    </div>
+    <button id="themeButton" type="button" aria-label="Toggle colour theme">🌙 Theme</button>
+  </header>
+
+  <section class="stats" aria-label="Task statistics">
+    <div class="stat"><strong id="totalCount">0</strong><span>Total tasks</span></div>
+    <div class="stat"><strong id="doneCount">0</strong><span>Completed</span></div>
+    <div class="stat"><strong id="overdueCount">0</strong><span>Overdue</span></div>
+    <div class="stat"><strong id="completionRate">0%</strong><span>Completion rate</span></div>
+  </section>
+  <div class="progress" role="progressbar" aria-label="Task completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressBar"><span id="progressFill"></span></div>
+  <div id="reminder" role="status"></div>
+
+  <section class="panel">
+    <h2 id="formHeading">Add a task</h2>
+    <form id="taskForm">
+      <label class="wide">Task title
+        <input id="taskTitle" maxlength="120" required placeholder="e.g. Complete database assignment">
+      </label>
+      <label>Course or subject
+        <input id="taskCourse" maxlength="60" placeholder="e.g. Introduction to Programming">
+      </label>
+      <label>Due date
+        <input id="taskDue" type="date" required>
+      </label>
+      <label>Priority
+        <select id="taskPriority">
+          <option value="high">High</option><option value="medium" selected>Medium</option><option value="low">Low</option>
+        </select>
+      </label>
+      <label class="wide">Notes (optional)
+        <textarea id="taskNotes" maxlength="500" placeholder="Add useful details about this task"></textarea>
+      </label>
+      <div class="form-actions">
+        <button class="primary" id="saveButton" type="submit">Add task</button>
+        <button id="cancelButton" type="button" hidden>Cancel edit</button>
+      </div>
+    </form>
+  </section>
+
+  <div class="toolbar">
+    <input id="searchInput" type="search" placeholder="Search title, course or notes" aria-label="Search tasks">
+    <select id="sortSelect" aria-label="Sort tasks">
+      <option value="due">Sort by due date</option>
+      <option value="priority">Sort by priority</option>
+      <option value="newest">Sort by newest</option>
+    </select>
+    <button id="clearButton" type="button">Clear completed</button>
+  </div>
+
+  <nav class="filters" id="filters" aria-label="Filter tasks">
+    <button type="button" data-filter="all" aria-pressed="true">All</button>
+    <button type="button" data-filter="todo" aria-pressed="false">To do</button>
+    <button type="button" data-filter="doing" aria-pressed="false">In progress</button>
+    <button type="button" data-filter="done" aria-pressed="false">Done</button>
+  </nav>
+
+  <section id="taskList" aria-live="polite"></section>
+  <p class="small-note">Your tasks are saved in this browser on this device using Local Storage. Clearing browser data may remove them.</p>
+</main>
+
+<script>
+(() => {
+  "use strict";
+  const STORAGE_KEY = "stm.tasks.v1";
+  const $ = id => document.getElementById(id);
+  let tasks = [];
+  let currentFilter = "all";
+  let editingId = null;
+  let deleteArmedId = null;
+
+  const todayString = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  };
+  const addDays = n => {
+    const d = new Date();
+    d.setDate(d.getDate()+n);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  };
+  const escapeHTML = value => {
+    const node = document.createElement("span");
+    node.textContent = String(value ?? "");
+    return node.innerHTML;
+  };
+  const makeId = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2,8)}`;
+  const isOverdue = task => task.status !== "done" && task.due < todayString();
+  const formatDate = value => {
+    const [y,m,d] = value.split("-").map(Number);
+    return new Date(y,m-1,d).toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric",year:"numeric"});
+  };
+
+  function loadTasks() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed.map(task => ({
+          id: task.id || makeId(),
+          title: task.title || "Untitled task",
+          course: task.course || "",
+          due: task.due || todayString(),
+          priority: task.priority || task.pri || "medium",
+          notes: task.notes || "",
+          status: task.status || "todo",
+          created: task.created || Date.now()
+        }));
+      }
+    } catch (error) {
+      console.warn("Could not load saved tasks:", error);
+    }
+    return [
+      {id:makeId(),title:"Read chapter 4",course:"History",due:addDays(1),priority:"medium",notes:"Take notes on key dates",status:"doing",created:1},
+      {id:makeId(),title:"Submit calculus problem set",course:"MATH 201",due:addDays(3),priority:"high",notes:"",status:"todo",created:2},
+      {id:makeId(),title:"Buy lab notebook",course:"CHEM 101",due:addDays(-1),priority:"low",notes:"",status:"todo",created:3}
+    ];
+  }
+  function saveTasks() {
+    try { localStorage.setItem(STORAGE_KEY,JSON.stringify(tasks)); }
+    catch (error) { alert("Your browser could not save tasks. Check available storage."); }
+  }
+  function resetForm() {
+    editingId = null;
+    $("taskForm").reset();
+    $("taskPriority").value = "medium";
+    $("formHeading").textContent = "Add a task";
+    $("saveButton").textContent = "Add task";
+    $("cancelButton").hidden = true;
+  }
+  function updateStats() {
+    const total = tasks.length;
+    const completed = tasks.filter(t => t.status === "done").length;
+    const overdue = tasks.filter(isOverdue).length;
+    const percent = total ? Math.round(completed/total*100) : 0;
+    $("totalCount").textContent = total;
+    $("doneCount").textContent = completed;
+    $("overdueCount").textContent = overdue;
+    $("completionRate").textContent = `${percent}%`;
+    $("progressFill").style.width = `${percent}%`;
+    $("progressBar").setAttribute("aria-valuenow",percent);
+
+    const dueSoon = tasks.filter(t => t.status !== "done" && t.due >= todayString() && t.due <= addDays(2)).length;
+    const reminder = $("reminder");
+    if (overdue || dueSoon) {
+      const messages = [];
+      if (overdue) messages.push(`${overdue} overdue`);
+      if (dueSoon) messages.push(`${dueSoon} due within two days`);
+      reminder.textContent = `Heads up: ${messages.join(" and ")}.`;
+      reminder.style.display = "block";
+    } else {
+      reminder.style.display = "none";
+    }
+  }
+  function render() {
+    const query = $("searchInput").value.trim().toLowerCase();
+    const priorityRank = {high:0,medium:1,low:2};
+    let visible = tasks.filter(task => {
+      if (currentFilter !== "all" && task.status !== currentFilter) return false;
+      const text = `${task.title} ${task.course} ${task.notes}`.toLowerCase();
+      return !query || text.includes(query);
+    });
+    visible.sort((a,b) => {
+      const sort = $("sortSelect").value;
+      if (sort === "priority") return priorityRank[a.priority]-priorityRank[b.priority] || a.due.localeCompare(b.due);
+      if (sort === "newest") return b.created-a.created;
+      return a.due.localeCompare(b.due);
+    });
+
+    const list = $("taskList");
+    if (!visible.length) {
+      list.innerHTML = `<div class="empty">${tasks.length ? "No tasks match this search or filter." : "No tasks yet. Add your first assignment above."}</div>`;
+      updateStats();
+      return;
+    }
+    list.innerHTML = visible.map(task => {
+      const overdue = isOverdue(task);
+      const priorityClass = task.priority === "medium" ? "medium" : task.priority;
+      return `<article class="task priority-${priorityClass}${task.status === "done" ? " completed" : ""}${overdue ? " overdue" : ""}" data-id="${escapeHTML(task.id)}">
+        <input class="task-check" type="checkbox" data-action="check" aria-label="Mark ${escapeHTML(task.title)} complete" ${task.status === "done" ? "checked" : ""}>
+        <div>
+          <div class="task-title">${escapeHTML(task.title)}</div>
+          <div class="meta">${task.course ? `${escapeHTML(task.course)} · ` : ""}Due ${formatDate(task.due)}${overdue ? ' · <span class="late">Overdue</span>' : ""} · ${escapeHTML(task.priority)} priority</div>
+        </div>
+        ${task.notes ? `<div class="notes">${escapeHTML(task.notes)}</div>` : ""}
+        <div class="actions">
+          <select data-action="status" aria-label="Task status">
+            <option value="todo" ${task.status==="todo"?"selected":""}>To do</option>
+            <option value="doing" ${task.status==="doing"?"selected":""}>In progress</option>
+            <option value="done" ${task.status==="done"?"selected":""}>Done</option>
+          </select>
+          <button type="button" data-action="edit">Edit</button>
+          <button type="button" class="delete${deleteArmedId===task.id?" confirm":""}" data-action="delete">${deleteArmedId===task.id?"Confirm delete":"Delete"}</button>
+        </div>
+      </article>`;
+    }).join("");
+    updateStats();
+  }
+
+  $("taskForm").addEventListener("submit",event => {
+    event.preventDefault();
+    const taskData = {
+      title:$("taskTitle").value.trim(),
+      course:$("taskCourse").value.trim(),
+      due:$("taskDue").value,
+      priority:$("taskPriority").value,
+      notes:$("taskNotes").value.trim()
+    };
+    if (!taskData.title || !taskData.due) return;
+    if (editingId) {
+      const task = tasks.find(item => item.id === editingId);
+      if (task) Object.assign(task,taskData);
+    } else {
+      tasks.push({id:makeId(),...taskData,status:"todo",created:Date.now()});
+    }
+    saveTasks();
+    resetForm();
+    render();
+  });
+  $("cancelButton").addEventListener("click",resetForm);
+
+  $("taskList").addEventListener("click",event => {
+    const button = event.target.closest("button[data-action]");
+    if (!button) return;
+    const card = button.closest("[data-id]");
+    if (!card) return;
+    const id = card.dataset.id;
+    const action = button.dataset.action;
+    if (action === "edit") {
+      const task = tasks.find(item => item.id === id);
+      if (!task) return;
+      $("taskTitle").value = task.title;
+      $("taskCourse").value = task.course;
+      $("taskDue").value = task.due;
+      $("taskPriority").value = task.priority;
+      $("taskNotes").value = task.notes;
+      editingId = id;
+      $("formHeading").textContent = "Edit task";
+      $("saveButton").textContent = "Save changes";
+      $("cancelButton").hidden = false;
+      $("taskTitle").focus();
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+    if (action === "delete") {
+      if (deleteArmedId === id) {
+        tasks = tasks.filter(item => item.id !== id);
+        deleteArmedId = null;
+        saveTasks();
+      } else {
+        deleteArmedId = id;
+      }
+      render();
+    }
+  });
+  $("taskList").addEventListener("change",event => {
+    const control = event.target;
+    const card = control.closest("[data-id]");
+    if (!card) return;
+    const task = tasks.find(item => item.id === card.dataset.id);
+    if (!task) return;
+    if (control.dataset.action === "check") task.status = control.checked ? "done" : "todo";
+    if (control.dataset.action === "status") task.status = control.value;
+    deleteArmedId = null;
+    saveTasks();
+    render();
+  });
+
+  $("filters").addEventListener("click",event => {
+    const button = event.target.closest("button[data-filter]");
+    if (!button) return;
+    currentFilter = button.dataset.filter;
+    $("filters").querySelectorAll("button").forEach(item => {
+      item.setAttribute("aria-pressed",String(item === button));
+    });
+    render();
+  });
+  $("searchInput").addEventListener("input",render);
+  $("sortSelect").addEventListener("change",render);
+  $("clearButton").addEventListener("click",() => {
+    const completed = tasks.filter(task => task.status === "done").length;
+    if (!completed) { alert("There are no completed tasks to clear."); return; }
+    if (confirm(`Delete ${completed} completed task(s)?`)) {
+      tasks = tasks.filter(task => task.status !== "done");
+      saveTasks();
+      render();
+    }
+  });
+  $("themeButton").addEventListener("click",() => {
+    const root = document.documentElement;
+    const dark = root.dataset.theme !== "dark";
+    root.dataset.theme = dark ? "dark" : "light";
+    $("themeButton").textContent = dark ? "☀️ Theme" : "🌙 Theme";
+    try { localStorage.setItem("student-task-manager.theme",root.dataset.theme); } catch (error) {}
+  });
+
+  tasks = loadTasks();
+  try {
+    const savedTheme = localStorage.getItem("student-task-manager.theme");
+    if (savedTheme === "dark" || savedTheme === "light") {
+      document.documentElement.dataset.theme = savedTheme;
+      $("themeButton").textContent = savedTheme === "dark" ? "☀️ Theme" : "🌙 Theme";
+    }
+  } catch (error) {}
+  saveTasks();
+  render();
+})();
+</script>
+</body>
+</html>
