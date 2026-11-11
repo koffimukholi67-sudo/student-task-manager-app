@@ -4,19 +4,21 @@ A responsive, browser-based application that helps students organize academic ta
 
 Live demo: https://koffimukholi67-sudo.github.io/student-task-manager-app/
 
-Screenshots
 
-Dashboard — all tasks completed
+## Screenshots
 
-"Student Task Manager dashboard showing 5 of 5 tasks completed" (screenshots/dashboard-completed.jpg)
+### Dashboard — all tasks completed
 
-Dashboard — deadline reminders
+![Dashboard showing 5 of 5 tasks completed](screenshots/dashboard-completed.jpg)
 
-"Student Task Manager dashboard showing task statistics and deadline reminders" (screenshots/dashboard-deadlines.jpg)
+### Dashboard — deadline reminders
 
-Task list and status controls
+![Dashboard showing task statistics and deadline reminders](screenshots/dashboard-deadlines.jpg)
 
-"Student Task Manager task list with status, edit and delete controls" (screenshots/task-list.jpg)
+### Task list and status controls
+
+![Task list showing status, edit and delete controls](screenshots/task-list.jpg)
+
 
 Overview
 
