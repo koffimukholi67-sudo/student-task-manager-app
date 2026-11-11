@@ -1,10 +1,15 @@
 Student Task Manager
+
 A responsive, browser-based application that helps students organize academic tasks, manage assignment deadlines, set priorities and monitor their progress.
 Live demo: https://koffimukholi67-sudo.github.io/student-task-manager-app/
+
 Overview
+
 Student Task Manager provides a simple dashboard for keeping track of coursework and other academic responsibilities. Add tasks, assign a course and due date, choose a priority, and update each task as work progresses.
 The application is built with standard front-end web technologies and stores tasks in the browser using Local Storage.
+
 Features
+
 Create tasks: Add a title, course or subject, due date, priority and optional notes.
 Edit and delete: Update existing tasks or remove tasks you no longer need.
 Track progress: Set each task to To do, In progress or Done.
@@ -30,7 +35,9 @@ If you downloaded a ZIP file, extract it.
 Open the project folder.
 Open index.html in a modern web browser.
 The application is a self-contained HTML file, so a separate build step or package installation is not required.
+
 How to Use
+
 Enter a task title.
 Optionally enter the course or subject.
 Choose a due date and priority.
@@ -62,7 +69,9 @@ Add downloadable task reports.
 Add calendar integration.
 Improve accessibility and usability through further testing.
 Add automated tests for core task-management features.
+
 Developer
+
 Koffi Mukholi Nyongesa
 Computer Science Student
 University of Kabianga, Kenya
