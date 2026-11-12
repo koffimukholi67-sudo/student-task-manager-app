@@ -129,6 +129,9 @@
       <option value="newest">Sort by newest</option>
     </select>
     <button id="clearButton" type="button">Clear completed</button>
+    <button id="exportButton" type="button">
+    Export My Tasks
+    </button>
   </div>
 
   <nav class="filters" id="filters" aria-label="Filter tasks">
@@ -367,6 +370,39 @@
       render();
     }
   });
+
+  
+$("exportButton").addEventListener("click", () => {
+  if (!tasks.length) {
+    alert("There are no tasks to export.");
+    return;
+  }
+
+  const backup = {
+    app: "Student Task Manager",
+    exportedAt: new Date().toISOString(),
+    tasks: tasks
+  };
+
+  const blob = new Blob(
+    [JSON.stringify(backup, null, 2)],
+    { type: "application/json" }
+  );
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = "student-task-manager-backup.json";
+
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  URL.revokeObjectURL(url);
+});
+
+      
   $("themeButton").addEventListener("click",() => {
     const root = document.documentElement;
     const dark = root.dataset.theme !== "dark";
